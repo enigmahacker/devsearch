@@ -75,16 +75,17 @@ const webPort = process.env.PORT ?? "3000";
 const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, ...parseEnv(readFileSync(join(dir, ".env"), "utf8")) };
 const procs = [
   spawn("uv", ["run", "--env-file", ".env", "uvicorn", "api.app.main:app", "--host", "127.0.0.1", "--port", apiPort], { cwd: dir, stdio: "inherit", shell }),
-  spawn("npm", ["--prefix", "web", "run", "dev"], { cwd: dir, stdio: "inherit", env, shell }),
+  // Loopback only: login is off in dev, so the app must not be reachable from the LAN.
+  spawn("npm", ["--prefix", "web", "run", "dev", "--", "-H", "127.0.0.1"], { cwd: dir, stdio: "inherit", env, shell }),
 ];
-console.log(`\nDevSearch: http://localhost:${webPort} (API http://127.0.0.1:${apiPort}). Ctrl-C to stop; \`ds stop\` stops Docker.\n`);
+console.log(`\nDevSearch: http://127.0.0.1:${webPort} (API http://127.0.0.1:${apiPort}). Ctrl-C to stop; \`ds stop\` stops Docker.\n`);
 const stop = (code) => { for (const p of procs) p.kill("SIGTERM"); process.exit(code); };
 process.on("SIGINT", () => stop(0));
 process.on("SIGTERM", () => stop(0));
 for (const p of procs) p.on("exit", (code) => stop(code ?? 1));
 
 // Open the browser once the web app answers (up to 2 minutes for the first compile).
-const url = `http://localhost:${webPort}`;
+const url = `http://127.0.0.1:${webPort}`;
 const opener = process.platform === "darwin" ? ["open", [url]] : shell ? ["cmd", ["/c", "start", "", url]] : ["xdg-open", [url]];
 (async () => {
   for (let i = 0; i < 120; i++) {

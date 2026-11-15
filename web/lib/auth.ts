@@ -39,10 +39,15 @@ export async function checkPassword(input: string): Promise<boolean> {
 }
 
 /** Only same-site relative paths, so ?next= cannot redirect off-site. */
-export const safeNext = (next: unknown) =>
-  typeof next === "string" && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/search";
+/** Browsers drop tabs/newlines in URLs, so "/\t/evil.com" would become "//evil.com": reject control chars and backslashes. */
+export function safeNext(next: unknown): string {
+  if (typeof next !== "string" || !next.startsWith("/") || /[\x00-\x1f\x7f\\]/.test(next)) return "/search";
+  const u = new URL(next, "http://x");
+  return u.origin === "http://x" ? u.pathname + u.search + u.hash : "/search";
+}
 
-/** Visitor IP as set by Vercel (x-real-ip), for per-IP rate limits in the API. */
+/** Visitor IP from a trusted proxy (x-real-ip), for per-IP rate limits. The API only trusts the forwarded value
+ *  when API_TOKEN is set; locally it uses the socket address, and the web app listens on 127.0.0.1 only. */
 export const clientIp = (h: Headers) => h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
 /** Headers for server-to-API calls: the shared token plus the visitor IP the API rate-limits on. */
