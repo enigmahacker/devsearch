@@ -43,7 +43,9 @@ export async function checkPassword(input: string): Promise<boolean> {
 export function safeNext(next: unknown): string {
   if (typeof next !== "string" || !next.startsWith("/") || /[\x00-\x1f\x7f\\]/.test(next)) return "/search";
   const u = new URL(next, "http://x");
-  return u.origin === "http://x" ? u.pathname + u.search + u.hash : "/search";
+  const out = u.pathname + u.search + u.hash;
+  // Normalizing "/.//evil.com" yields "//evil.com", so check the output too.
+  return u.origin === "http://x" && !out.startsWith("//") ? out : "/search";
 }
 
 /** Visitor IP from a trusted proxy (x-real-ip), for per-IP rate limits. The API only trusts the forwarded value
