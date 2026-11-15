@@ -132,5 +132,5 @@ workers/  connectors (docs, GitHub, Stack Overflow) -> chunk -> embed -> index
 ## Troubleshooting
 
 - **`docker not found` or containers fail**: start Docker Desktop (or `sudo systemctl start docker` on Linux), then run `ds` again.
-- **Port already in use**: `PORT=3001 API_PORT=8002 ds`.
+- **Port already in use**: `ds` moves to the next free port and prints the URL it opened.
 - **Start over**: `ds stop`, then delete `~/devsearch` and run `ds` again.

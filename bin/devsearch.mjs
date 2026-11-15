@@ -2,6 +2,7 @@
 // DevSearch local runner: copies the app into a folder, starts the stores in Docker, then the API and the web app.
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
+import { createServer } from "node:net";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,7 +25,7 @@ if (cmd === "help" || cmd === "-h" || cmd === "--help") {
   ds stop [dir]   stop the Docker stores
   ds help         this help
 
-dir defaults to $DEVSEARCH_HOME or ~/devsearch. Ports: PORT (web, default 3000), API_PORT (default 8000).
+dir defaults to $DEVSEARCH_HOME or ~/devsearch. Ports: PORT (web, default 3000), API_PORT (default 8000); a busy port moves to the next free one.
 
 Needs Docker, uv (https://docs.astral.sh/uv/) and Node 20.12+. Then open http://localhost:3000
 and add your model provider key in Settings.`);
@@ -70,13 +71,21 @@ if (!existsSync(seeded)) {
 }
 
 // The web app gets the same .env (SUPPORT_URL, AUTH_*); Next.js would otherwise only read web/.env*.
-const apiPort = process.env.API_PORT ?? "8000";
-const webPort = process.env.PORT ?? "3000";
+// Take the next free port, so a busy 3000/8000 never crashes the start or opens someone else's app.
+const free = (port) => new Promise((ok) => {
+  const s = createServer().once("error", () => ok(false)).listen(port, "127.0.0.1", () => s.close(() => ok(true)));
+});
+async function pick(start) {
+  for (let p = Number(start); p < Number(start) + 50; p++) if (await free(p)) return String(p);
+  die(`no free port near ${start}`);
+}
+const apiPort = await pick(process.env.API_PORT ?? "8000");
+const webPort = await pick(process.env.PORT ?? "3000");
 const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, ...parseEnv(readFileSync(join(dir, ".env"), "utf8")) };
 const procs = [
   spawn("uv", ["run", "--env-file", ".env", "uvicorn", "api.app.main:app", "--host", "127.0.0.1", "--port", apiPort], { cwd: dir, stdio: "inherit", shell }),
   // Loopback only: login is off in dev, so the app must not be reachable from the LAN.
-  spawn("npm", ["--prefix", "web", "run", "dev", "--", "-H", "127.0.0.1"], { cwd: dir, stdio: "inherit", env, shell }),
+  spawn("npm", ["--prefix", "web", "run", "dev", "--", "-H", "127.0.0.1", "-p", webPort], { cwd: dir, stdio: "inherit", env, shell }),
 ];
 console.log(`\nDevSearch: http://127.0.0.1:${webPort} (API http://127.0.0.1:${apiPort}). Ctrl-C to stop; \`ds stop\` stops Docker.\n`);
 const stop = (code) => { for (const p of procs) p.kill("SIGTERM"); process.exit(code); };
