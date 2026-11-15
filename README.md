@@ -1,5 +1,7 @@
 # DevSearch
 
+[![npm](https://img.shields.io/npm/v/@aryptn/devsearch)](https://www.npmjs.com/package/@aryptn/devsearch) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Search official docs, GitHub and Stack Overflow in one place, filter by framework and version, and get an AI answer where every `[n]` cites a retrieved source (or says "not found in sources").
 
 Runs entirely on your machine. Bring your own model key: Claude, OpenAI, Gemini, xAI, Mistral, DeepSeek, OpenRouter, or any OpenAI-compatible server (Ollama, vLLM, LiteLLM).
@@ -11,7 +13,7 @@ npm install -g @aryptn/devsearch
 ds
 ```
 
-`ds` sets everything up on the first run, starts the app and opens http://localhost:3000. Add your model key in **Settings**. The key stays in your browser.
+`ds` sets everything up on the first run, starts the app and opens it in your browser (http://127.0.0.1:3000, or the next free port). On the first visit, a setup popup asks you to pick an AI provider and model and paste your API key. The key stays in your browser. You can change it any time in **Settings**.
 
 | Command | What it does |
 |---|---|
@@ -22,7 +24,16 @@ ds
 
 Ctrl-C stops the app. The app lives in `~/devsearch` (or `$DEVSEARCH_HOME`). Your settings are in `~/devsearch/.env`.
 
-No global install? `npx @aryptn/devsearch` does the same.
+No global install? `npx @aryptn/devsearch` does the same. `devsearch` is an alias for `ds`.
+
+### Update
+
+```bash
+npm install -g @aryptn/devsearch@latest
+ds
+```
+
+`ds` notices the new version and refreshes the app in `~/devsearch`. Your `.env` and data are kept.
 
 ## Requirements
 
@@ -84,7 +95,7 @@ Edit `~/devsearch/.env`, then run `ds` again. Every setting is optional.
 | `VOYAGE_API_KEY` | Real semantic embeddings. Without it, a weak local fallback is used. |
 | `GITHUB_TOKEN`, `STACK_KEY` | Higher crawl rate limits |
 | `POSTGRES_DSN` | Use your own Postgres or Supabase (transaction-pooler URI with `sslmode=require`) |
-| `PORT`, `API_PORT` | Environment variables if 3000 or 8000 are taken: `PORT=3001 API_PORT=8002 ds` |
+| `PORT`, `API_PORT` | Starting ports for the web app and API (default 3000 and 8000). A busy port moves to the next free one. Example: `PORT=4000 ds` |
 
 ### Load more content
 
@@ -117,7 +128,7 @@ npm --prefix web install && npm --prefix web run dev       # http://localhost:30
 
 ```
 bin/      ds command
-web/      Next.js + Tailwind: search page, answer panel, settings
+web/      Next.js + Tailwind: search page, answer panel, settings, setup popup
 api/      FastAPI: /search, /answer, /filters, /models
 workers/  connectors (docs, GitHub, Stack Overflow) -> chunk -> embed -> index
 ```
@@ -133,7 +144,13 @@ workers/  connectors (docs, GitHub, Stack Overflow) -> chunk -> embed -> index
 
 - **`docker not found` or containers fail**: start Docker Desktop (or `sudo systemctl start docker` on Linux), then run `ds` again.
 - **Port already in use**: `ds` moves to the next free port and prints the URL it opened.
+- **`ds` runs a different program**: another package (for example `dev-search`) also installs a `ds` command. Use `devsearch` instead, or `npm uninstall -g dev-search`.
+- **The setup popup doesn't appear**: it shows only while the chosen model has no key. Open **Settings** to add or change keys.
 - **Start over**: `ds stop`, then delete `~/devsearch` and run `ds` again.
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). By taking part, you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
