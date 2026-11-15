@@ -1,7 +1,8 @@
 {
   "name": "@aryptn/devsearch",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Run DevSearch locally: search docs, GitHub and Stack Overflow with grounded answers from your own model key.",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "ds": "bin/devsearch.mjs",

@@ -53,17 +53,24 @@ if (cmd === "stop") {
 need("uv", "Install uv: https://docs.astral.sh/uv/getting-started/installation/");
 need("npm", "Install Node.js 20.12+: https://nodejs.org");
 
-if (!existsSync(join(dir, "pyproject.toml"))) {
-  console.log(`Creating DevSearch in ${dir}`);
+// Copy the app on first run, and refresh its code after `npm i -g` brings a new version. .env and data are kept.
+const VERSION = JSON.parse(readFileSync(join(PKG, "package.json"), "utf8")).version;
+const stamp = join(dir, ".devsearch-version");
+const fresh = !existsSync(join(dir, "pyproject.toml"));
+const stale = !fresh && PKG !== dir && (existsSync(stamp) ? readFileSync(stamp, "utf8").trim() : "") !== VERSION;
+if (fresh || stale) {
+  console.log(`${fresh ? "Creating" : `Updating to ${VERSION}:`} DevSearch in ${dir}`);
   // Never copy secrets (.env, .env.local...) even if a dev build of the package contains them.
+  // shortcut: files deleted upstream linger in dir; switch to a clean re-copy if that ever matters.
   const keep = (p) => !SKIP.has(basename(p)) && !/^\.env(?!\.example$)/.test(basename(p));
   for (const f of COPY) if (existsSync(join(PKG, f))) cpSync(join(PKG, f), join(dir, f), { recursive: true, filter: keep });
+  writeFileSync(stamp, VERSION + "\n");
 }
 if (!existsSync(join(dir, ".env"))) copyFileSync(join(dir, ".env.example"), join(dir, ".env"));
 
 run("docker", ["compose", "up", "-d", "--wait"]);
 run("uv", ["sync"]);
-if (!existsSync(join(dir, "web", "node_modules"))) run("npm", ["--prefix", "web", "install"]);
+if (stale || !existsSync(join(dir, "web", "node_modules"))) run("npm", ["--prefix", "web", "install"]);
 const seeded = join(dir, ".devsearch-seeded");
 if (!existsSync(seeded)) {
   run("uv", ["run", "--env-file", ".env", "python", "-m", "workers.run", "--fixtures"]);

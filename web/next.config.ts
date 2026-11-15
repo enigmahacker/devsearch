@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 // /api/* is proxied to FastAPI by middleware.ts (it adds the server-only API_TOKEN). CSP is also set there (per-request nonce).
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Pin the root: a stray package-lock.json in a parent folder (e.g. ~) would otherwise be picked as the workspace.
+  turbopack: { root: __dirname },
   async headers() {
     return [
       {

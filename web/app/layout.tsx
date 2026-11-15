@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 
 import { Cursor } from "@/components/Cursor";
+import { SetupDialog } from "@/components/SetupDialog";
 import { SupportButton } from "@/components/SupportButton";
 
 import "./globals.css";
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </nav>
         </header>
         {children}
+        <SetupDialog />
         <Cursor />
       </body>
     </html>
