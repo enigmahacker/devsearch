@@ -1,0 +1,11 @@
+# DevSearch is a signed-in app; nothing here is meant for search indexes.
+User-agent: *
+Disallow: /
+
+# AI crawlers: see /llms.txt for what this site is.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: CCBot
+User-agent: PerplexityBot
+Disallow: /

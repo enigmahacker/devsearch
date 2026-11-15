@@ -1,0 +1,11 @@
+# DevSearch
+
+> Developer search across official documentation, GitHub and Stack Overflow, with AI answers whose every claim cites a retrieved source.
+
+DevSearch is a private, sign-in-only application. There is no public content to index or train on, and the API is not open to third parties.
+
+## Notes for agents
+
+- All pages except /login require an authenticated session; automated access is not permitted.
+- Answers are generated per request from crawled sources and are not stable reference material.
+- Security reports: see /.well-known/security.txt

@@ -1,0 +1,14 @@
+# secrets: only .env.example is committed
+.env*
+!.env.example
+
+node_modules/
+.next/
+.venv/
+__pycache__/
+.pytest_cache/
+*.tsbuildinfo
+*.tgz
+.devsearch-seeded
+.vercel/
+.DS_Store

@@ -1,0 +1,49 @@
+{
+  "_note": "Hand-written sample content for offline tests. Not copied from the real sites; URLs point at fixtures.devsearch.local.",
+  "docs": [
+    {
+      "seed": {"framework": "react", "language": "javascript", "version": "19"},
+      "url": "https://fixtures.devsearch.local/react/19/useEffect",
+      "html": "<html><head><title>useEffect (React 19)</title></head><body><nav>Menu</nav><main><h1>useEffect</h1><p>useEffect lets a component synchronize with an external system such as a network connection or a browser API.</p><h2>Cleanup</h2><p>Return a cleanup function from the setup function. React calls cleanup before the effect runs again with new dependencies, and when the component unmounts.</p><pre><code class=\"language-js\">useEffect(() => {\n  const conn = createConnection(roomId);\n  conn.connect();\n  return () => conn.disconnect();\n}, [roomId]);</code></pre><h2>Strict Mode</h2><p>In development with Strict Mode, React runs one extra setup and cleanup cycle right after mount to check that cleanup undoes setup. This does not happen in production.</p></main><footer>Footer</footer></body></html>"
+    },
+    {
+      "seed": {"framework": "react", "language": "javascript", "version": "18"},
+      "url": "https://fixtures.devsearch.local/react/18/hooks-effect",
+      "html": "<html><head><title>Using the Effect Hook (React 18)</title></head><body><h1>Using the Effect Hook</h1><p>The Effect Hook combines what class components did in componentDidMount, componentDidUpdate and componentWillUnmount.</p><h2>Effects with cleanup</h2><p>If your effect returns a function, React runs it when it is time to clean up, replacing the componentWillUnmount lifecycle method.</p><pre><code class=\"language-js\">useEffect(() => {\n  ChatAPI.subscribe(props.friend.id, handleChange);\n  return () => ChatAPI.unsubscribe(props.friend.id, handleChange);\n});</code></pre></body></html>"
+    },
+    {
+      "seed": {"framework": "fastapi", "language": "python", "version": "latest"},
+      "url": "https://fixtures.devsearch.local/fastapi/dependencies",
+      "html": "<html><head><title>Dependencies - FastAPI</title></head><body><h1>Dependencies</h1><p>Declare a dependency by adding a parameter with Depends() to a path operation function. FastAPI calls the dependency for each request and passes the result in.</p><pre><code class=\"language-python\">from typing import Annotated\nfrom fastapi import Depends, FastAPI\n\napp = FastAPI()\n\nasync def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):\n    return {\"q\": q, \"skip\": skip, \"limit\": limit}\n\n@app.get(\"/items/\")\nasync def read_items(commons: Annotated[dict, Depends(common_parameters)]):\n    return commons</code></pre><h2>Dependencies with yield</h2><p>A dependency that uses yield runs its code after the yield once the response is sent, which suits closing a database session.</p></body></html>"
+    }
+  ],
+  "github": [
+    {
+      "seed": {"framework": "fastapi", "language": "python", "version": "latest"},
+      "repo": {"html_url": "https://fixtures.devsearch.local/github/fastapi", "full_name": "fixtures/fastapi", "pushed_at": "2026-10-01T00:00:00+00:00"},
+      "readme": "# FastAPI sample\n\nA sample README.\n\n## Installation\n\n```bash\npip install \"fastapi[standard]\"\n```\n\n## Run the dev server\n\n```bash\nfastapi dev main.py\n```\n",
+      "release": {"tag_name": "v0.115.0"}
+    }
+  ],
+  "stackoverflow": [
+    {
+      "seed": {"framework": "react", "language": "javascript"},
+      "question": {
+        "question_id": 1,
+        "title": "Why does my useEffect run twice on mount?",
+        "link": "https://fixtures.devsearch.local/so/1",
+        "score": 42,
+        "last_activity_date": 1760000000,
+        "owner": {"display_name": "sample_asker"},
+        "body": "<p>My <code>useEffect</code> with an empty dependency array logs twice when the page loads. Is this a bug?</p>"
+      },
+      "answers": [
+        {
+          "question_id": 1, "score": 80, "is_accepted": true,
+          "owner": {"display_name": "sample_answerer"},
+          "body": "<p>This is React Strict Mode in development. It mounts, unmounts and mounts again to surface missing cleanup. Production builds run the effect once. Fix the effect so cleanup undoes setup instead of removing Strict Mode.</p>"
+        }
+      ]
+    }
+  ]
+}

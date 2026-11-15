@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: devsearch
+      POSTGRES_PASSWORD: devsearch
+      POSTGRES_DB: devsearch
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devsearch"]
+      interval: 5s
+      retries: 20
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true" # local dev only; enable security before exposing it
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports: ["127.0.0.1:9200:9200"]
+    volumes: [osdata:/usr/share/opensearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf localhost:9200/_cluster/health"]
+      interval: 5s
+      retries: 40
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.4
+    ports: ["127.0.0.1:6333:6333"]
+    volumes: [qdata:/qdrant/storage]
+
+  redis:
+    image: redis:7.4
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  pgdata:
+  osdata:
+  qdata:

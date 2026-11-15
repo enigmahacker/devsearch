@@ -1,0 +1,57 @@
+{
+  "name": "devsearch",
+  "version": "0.1.0",
+  "description": "Run DevSearch locally: search docs, GitHub and Stack Overflow with grounded answers from your own model key.",
+  "type": "module",
+  "bin": {
+    "ds": "bin/devsearch.mjs",
+    "devsearch": "bin/devsearch.mjs"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "keywords": [
+    "search",
+    "rag",
+    "llm",
+    "developer-tools",
+    "local"
+  ],
+  "files": [
+    "bin",
+    "api",
+    "workers",
+    "docker-compose.yml",
+    "pyproject.toml",
+    "uv.lock",
+    ".env.example",
+    "web/app",
+    "web/components",
+    "web/lib",
+    "web/public",
+    "web/middleware.ts",
+    "web/next.config.ts",
+    "web/next-env.d.ts",
+    "web/package.json",
+    "web/package-lock.json",
+    "web/tsconfig.json",
+    "web/postcss.config.mjs",
+    "web/eslint.config.mjs",
+    "web/components.json",
+    "!**/__pycache__",
+    "!**/.pytest_cache"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enigmahacker/devsearch.git"
+  },
+  "homepage": "https://github.com/enigmahacker/devsearch#readme",
+  "bugs": {
+    "url": "https://github.com/enigmahacker/devsearch/issues"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ]
+}
