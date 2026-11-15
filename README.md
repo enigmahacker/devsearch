@@ -19,6 +19,8 @@ ds
 |---|---|
 | `ds` | Set up on first run, start, open the browser |
 | `ds stop` | Stop the Docker containers |
+| `ds update` | Update to the latest version |
+| `ds --version` | Show the installed version |
 | `ds help` | Show usage |
 | `ds ~/other-folder` | Use a different install folder |
 
@@ -29,11 +31,13 @@ No global install? `npx @aryptn/devsearch` does the same. `devsearch` is an alia
 ### Update
 
 ```bash
-npm install -g @aryptn/devsearch@latest
+ds update
 ds
 ```
 
-`ds` notices the new version and refreshes the app in `~/devsearch`. Your `.env` and data are kept.
+`ds` tells you when a newer version is out (it asks the npm registry for the latest version number at start; nothing else is sent). `ds update` installs it (the same as `npm install -g @aryptn/devsearch@latest`), and the next `ds` refreshes the app in `~/devsearch`. Your `.env` and data are kept.
+
+Every version is also mirrored to [GitHub Packages](https://github.com/enigmahacker/devsearch/packages) as `@enigmahacker/devsearch`, with notes on the [Releases](https://github.com/enigmahacker/devsearch/releases) page.
 
 ## Requirements
 

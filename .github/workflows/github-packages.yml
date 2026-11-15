@@ -1,0 +1,39 @@
+# Mirrors each npm release of @aryptn/devsearch to GitHub Packages as @enigmahacker/devsearch
+# (GitHub's npm registry only accepts the repo owner's scope). Runs when a GitHub Release is published,
+# so publish to npm first, then create the release; or run it by hand for one version.
+name: GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: npm version to mirror, for example 0.1.4
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@enigmahacker"
+      - name: Mirror the npm tarball
+        env:
+          VERSION: ${{ inputs.version || github.event.release.tag_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          v="${VERSION#v}"
+          [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a version: $VERSION"; exit 1; }
+          npm pack "@aryptn/devsearch@$v" --registry https://registry.npmjs.org
+          tar xzf "aryptn-devsearch-$v.tgz"
+          cd package
+          npm pkg set name=@enigmahacker/devsearch publishConfig.registry=https://npm.pkg.github.com
+          npm publish

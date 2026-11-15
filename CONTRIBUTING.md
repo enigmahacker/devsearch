@@ -63,6 +63,12 @@ Then:
 - **Respect sources.** Connectors must honor `robots.txt`, crawl delays and the source's license.
 - **Keep dependencies few.** Explain any new dependency in the pull request.
 
+## Releasing (maintainers)
+
+1. Bump `version` in `package.json` and commit.
+2. `npm publish --access public` (approve the sign-in in your browser).
+3. `gh release create v<version> --generate-notes`. The **GitHub Packages** workflow then mirrors that version to GitHub Packages.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).
