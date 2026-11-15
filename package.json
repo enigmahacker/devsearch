@@ -1,5 +1,5 @@
 {
-  "name": "devsearch",
+  "name": "@aryptn/devsearch",
   "version": "0.1.0",
   "description": "Run DevSearch locally: search docs, GitHub and Stack Overflow with grounded answers from your own model key.",
   "type": "module",

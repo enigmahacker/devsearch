@@ -7,7 +7,7 @@ Runs entirely on your machine. Bring your own model key: Claude, OpenAI, Gemini,
 ## Quick start
 
 ```bash
-npm install -g devsearch
+npm install -g @aryptn/devsearch
 ds
 ```
 
@@ -22,7 +22,7 @@ ds
 
 Ctrl-C stops the app. The app lives in `~/devsearch` (or `$DEVSEARCH_HOME`). Your settings are in `~/devsearch/.env`.
 
-No global install? `npx devsearch` does the same.
+No global install? `npx @aryptn/devsearch` does the same.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ No global install? `npx devsearch` does the same.
 ```bash
 brew install node uv
 brew install --cask docker     # then open Docker Desktop once
-npm install -g devsearch
+npm install -g @aryptn/devsearch
 ds
 ```
 
@@ -53,7 +53,7 @@ sudo usermod -aG docker $USER  # log out and back in afterwards
 # uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-npm install -g devsearch
+npm install -g @aryptn/devsearch
 ds
 ```
 
@@ -66,7 +66,7 @@ winget install OpenJS.NodeJS.LTS
 winget install Docker.DockerDesktop    # then start Docker Desktop
 winget install astral-sh.uv
 # open a new terminal so PATH updates
-npm install -g devsearch
+npm install -g @aryptn/devsearch
 ds
 ```
 
