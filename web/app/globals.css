@@ -179,3 +179,14 @@ body { min-height: 100dvh; overflow-x: hidden; }
 
 .support-btn svg { animation: beat 2.4s ease-in-out infinite; }
 @keyframes beat { 0%, 60%, 100% { transform: scale(1); } 30% { transform: scale(1.25); } }
+
+/* ---- Launch look (matches the v1.0.5 post): grid, kicker, version tag, feature checks ---- */
+.grid-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .45;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px; mask-image: radial-gradient(ellipse at 50% 30%, #000 15%, transparent 70%); }
+.kicker { font-size: .75rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--link); }
+.version-tag { font-size: .7rem; font-weight: 700; padding: .15rem .55rem; border-radius: 9999px; letter-spacing: .02em;
+  background: oklch(0.72 0.17 285 / 16%); border: 1px solid oklch(0.72 0.17 285 / 50%); color: oklch(0.88 0.08 285); }
+.feature { display: flex; align-items: center; gap: .75rem; }
+.feature::before { content: "✓"; flex: none; width: 1.5rem; height: 1.5rem; border-radius: .45rem; display: grid; place-items: center;
+  font-size: .75rem; font-weight: 800; background: oklch(0.72 0.17 285 / 20%); color: oklch(0.88 0.1 285); }

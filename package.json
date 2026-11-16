@@ -1,6 +1,6 @@
 {
   "name": "@aryptn/devsearch",
-  "version": "0.1.4",
+  "version": "1.0.5",
   "description": "Run DevSearch locally: search docs, GitHub and Stack Overflow with grounded answers from your own model key.",
   "license": "MIT",
   "type": "module",

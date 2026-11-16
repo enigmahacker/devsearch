@@ -127,7 +127,7 @@ async function pick(start) {
 }
 const apiPort = await pick(process.env.API_PORT ?? "8000");
 const webPort = await pick(process.env.PORT ?? "3000");
-const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, ...parseEnv(readFileSync(join(dir, ".env"), "utf8")) };
+const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, DEVSEARCH_VERSION: VERSION, ...parseEnv(readFileSync(join(dir, ".env"), "utf8")) };
 const procs = [
   spawn("uv", ["run", "--env-file", ".env", "uvicorn", "api.app.main:app", "--host", "127.0.0.1", "--port", apiPort], { cwd: dir, stdio: "inherit", shell }),
   // Loopback only: login is off in dev, so the app must not be reachable from the LAN.

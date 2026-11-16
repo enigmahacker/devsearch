@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DevSearch v1.0.5 reel</title>
+<!-- 30s, 1080x1920. Every animation sits on one timeline; render-reel.mjs seeks it frame by frame. -->
+<style>
+  :root {
+    --bg: oklch(0.13 0.015 275); --fg: oklch(0.97 0.005 275); --muted: oklch(0.72 0.02 275);
+    --primary: oklch(0.72 0.17 285); --link: oklch(0.78 0.13 220);
+    --glass: oklch(0.2 0.02 275 / 0.62); --line: oklch(1 0 0 / 0.1);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+  body { font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif; color: var(--fg); position: relative; }
+  .mono { font-family: "SF Mono", ui-monospace, Menlo, monospace; }
+
+  .aurora { position: absolute; inset: -240px; filter: blur(120px); opacity: .95; animation: drift 30s ease-in-out both; }
+  .aurora i { position: absolute; border-radius: 50%; }
+  .aurora i:nth-child(1) { width: 820px; height: 700px; left: 20px; top: 60px; background: oklch(0.55 0.22 290 / .75); }
+  .aurora i:nth-child(2) { width: 700px; height: 640px; right: 0; top: 700px; background: oklch(0.6 0.16 225 / .6); }
+  .aurora i:nth-child(3) { width: 760px; height: 600px; left: 200px; bottom: 120px; background: oklch(0.5 0.2 320 / .45); }
+  @keyframes drift { to { transform: translate3d(90px, -120px, 0) rotate(10deg) scale(1.1); } }
+  .grid { position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 60px 60px; mask-image: radial-gradient(ellipse at 50% 35%, #000 20%, transparent 75%); opacity: .5; }
+
+  /* Top/bottom padding keeps content clear of the Reels UI overlays. */
+  main { position: relative; height: 100%; padding: 190px 80px 280px; display: flex; flex-direction: column; }
+
+  /* Shared entrances; each element gets its start time via --d. */
+  .in { animation: rise .9s cubic-bezier(.2,.8,.2,1) var(--d) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px); filter: blur(8px); } }
+  .pop { animation: pop .7s cubic-bezier(.3,1.6,.5,1) var(--d) both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.6); } }
+
+  header { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 46px; font-weight: 700; letter-spacing: -0.02em; }
+  .dot { width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, var(--primary) 45%, var(--link));
+    box-shadow: 0 0 30px var(--primary), 0 0 70px oklch(0.72 0.17 285 / .5); }
+  .tag { font-size: 30px; font-weight: 700; padding: 14px 28px; border-radius: 999px;
+    background: oklch(0.72 0.17 285 / .16); border: 1.5px solid oklch(0.72 0.17 285 / .55); color: oklch(0.88 0.08 285); }
+
+  .kicker { margin-top: 80px; font-size: 28px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--link); }
+  h1 { margin-top: 18px; font-size: 100px; line-height: .98; font-weight: 800; letter-spacing: -0.045em; }
+  h1 span { display: block; background: linear-gradient(100deg, var(--fg) 15%, var(--primary) 60%, var(--link) 95%);
+    -webkit-background-clip: text; color: transparent; }
+  .sub { margin-top: 28px; font-size: 38px; line-height: 1.35; color: var(--muted); }
+
+  .card { margin-top: 50px; border-radius: 34px; background: var(--glass); border: 1.5px solid var(--line);
+    box-shadow: 0 30px 80px oklch(0 0 0 / .45); padding: 34px 36px; }
+  .search { display: flex; align-items: center; gap: 20px; font-size: 28px; padding: 24px 26px; border-radius: 20px;
+    background: oklch(0.1 0.015 275 / .8); border: 1.5px solid oklch(0.72 0.17 285 / .5); box-shadow: 0 0 0 7px oklch(0.72 0.17 285 / .12); }
+  .search svg { flex: none; }
+  /* 40 characters typed with steps(); mono so each step is one character. */
+  .typed { flex: none; overflow: hidden; white-space: nowrap; width: 0; animation: type 2.4s steps(40, end) 9.6s both; }
+  @keyframes type { to { width: 40ch; } }
+  .caret { width: 3px; height: 36px; background: var(--primary); animation: blink 1s steps(2, start) 0s 30; }
+  @keyframes blink { to { visibility: hidden; } }
+  .answer { margin-top: 28px; font-size: 31px; line-height: 1.5; color: oklch(0.9 0.01 275); }
+  .answer b { color: var(--fg); }
+  .cite { display: inline-block; font-size: 22px; font-weight: 700; padding: 1px 10px; margin: 0 2px; border-radius: 8px; vertical-align: 4px;
+    background: oklch(0.72 0.17 285 / .22); color: oklch(0.86 0.1 285); }
+  .sources { margin-top: 24px; display: flex; gap: 14px; }
+  .src { font-size: 23px; padding: 10px 18px; border-radius: 12px; background: oklch(1 0 0 / .06); border: 1px solid var(--line); color: var(--muted); }
+  .src::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 12px; vertical-align: 2px; }
+  .src.d::before { background: oklch(0.78 0.15 150); } .src.g::before { background: var(--primary); } .src.s::before { background: oklch(0.78 0.15 60); }
+
+  .new { margin-top: 46px; display: grid; grid-template-columns: auto auto; justify-content: space-between; gap: 22px 30px; }
+  .new div { font-size: 29px; white-space: nowrap; display: flex; align-items: center; gap: 16px; }
+  .new div::before { content: "✓"; flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 24px; font-weight: 800;
+    background: oklch(0.72 0.17 285 / .2); color: oklch(0.88 0.1 285); }
+
+  .install { margin-top: 44px; font-size: 32px; padding: 28px 32px; border-radius: 20px;
+    background: oklch(0.08 0.01 275 / .85); border: 1.5px solid var(--line); white-space: nowrap; }
+  .install .p { color: var(--primary); margin-right: 16px; }
+  .install .ds { color: var(--link); }
+  .cmd { display: inline-block; vertical-align: bottom; overflow: hidden; width: 0; animation: cmd 1.8s steps(34, end) 22.8s both; }
+  @keyframes cmd { to { width: 34ch; } }
+
+  footer { margin-top: auto; padding-top: 40px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .goals { display: flex; gap: 18px; }
+  .goal { padding: 20px 28px; border-radius: 24px; background: var(--glass); border: 1.5px solid var(--line); }
+  .goal span { display: block; font-size: 20px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  .goal strong { display: block; margin-top: 4px; font-size: 54px; font-weight: 800; letter-spacing: -0.03em; }
+  .goal.likes strong { color: oklch(0.8 0.16 10); } .goal.views strong { color: var(--link); }
+  .handle { text-align: right; font-size: 27px; color: var(--muted); line-height: 1.5; }
+  .handle b { color: var(--fg); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="grid" aria-hidden="true"></div>
+  <main>
+    <header>
+      <div class="brand in" style="--d:.2s"><span class="dot"></span>DevSearch</div>
+      <div class="tag pop" style="--d:1.2s">v1.0.5 is live</div>
+    </header>
+
+    <p class="kicker in" style="--d:2.4s">Docs · GitHub · Stack Overflow</p>
+    <h1><span class="in" style="--d:3.4s">Search every doc.</span><span class="in" style="--d:4.6s">Get cited answers.</span></h1>
+    <p class="sub in" style="--d:6.2s">One search across the sources developers trust. Every claim links back to where it came from.</p>
+
+    <div class="card in" style="--d:8.4s">
+      <div class="search">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.17 285)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="typed mono">How do I clean up an effect in React 19?</span><span class="caret"></span>
+      </div>
+      <p class="answer in" style="--d:12.8s">Return a <b>cleanup function</b> from <span class="mono">useEffect</span>. React runs it before the effect re-runs and when the component unmounts<span class="cite">1</span><span class="cite">2</span>.</p>
+      <div class="sources">
+        <span class="src d pop" style="--d:14.6s">react.dev</span>
+        <span class="src g pop" style="--d:15s">facebook/react</span>
+        <span class="src s pop" style="--d:15.4s">Stack Overflow</span>
+      </div>
+    </div>
+
+    <div class="new">
+      <div class="in" style="--d:17.4s">Bring your own AI key</div>
+      <div class="in" style="--d:18.2s">Claude, GPT, Gemini &amp; more</div>
+      <div class="in" style="--d:19s">Runs 100% on your machine</div>
+      <div class="in" style="--d:19.8s">One-command <span class="mono">ds update</span></div>
+    </div>
+
+    <div class="install mono in" style="--d:21.8s"><span class="p">$</span><span class="cmd">npm i -g @aryptn/devsearch &amp;&amp; <span class="ds">ds</span></span></div>
+
+    <footer>
+      <div class="goals">
+        <div class="goal likes pop" style="--d:25.6s"><span>Goal</span><strong>♥ 100K likes</strong></div>
+        <div class="goal views pop" style="--d:26.4s"><span>Goal</span><strong>▶ 1M views</strong></div>
+      </div>
+      <div class="handle in" style="--d:27.4s">Like, share &amp;<br><b>star on GitHub</b></div>
+    </footer>
+  </main>
+  <script>
+    // Seek every animation to t ms; the renderer calls this per frame, so output never depends on capture speed.
+    window.seek = (t) => document.getAnimations().forEach((a) => { a.pause(); a.currentTime = t; });
+  </script>
+</body>
+</html>

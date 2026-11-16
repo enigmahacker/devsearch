@@ -53,8 +53,13 @@ export default async function SearchPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <section className={`animate-in fade-in slide-in-from-bottom-3 duration-700 ${q.trim() ? "mb-6" : "mt-[12vh] mb-10 text-center"}`}>
-        <h1 className={`text-gradient font-semibold tracking-tight ${q.trim() ? "text-2xl" : "text-5xl sm:text-6xl"}`}>Search the docs. Get cited answers.</h1>
-        <p className="mt-3 text-sm text-muted-foreground">Official docs, GitHub and Stack Overflow, ranked together. Every claim links to its source.</p>
+        {!q.trim() && <p className="kicker mb-3">Docs · GitHub · Stack Overflow</p>}
+        <h1 className={`text-gradient tracking-tight ${q.trim() ? "text-2xl font-semibold" : "text-5xl font-extrabold leading-[1.02] sm:text-7xl"}`}>
+          Search every doc.{!q.trim() && <br />} Get cited answers.
+        </h1>
+        <p className={`mt-3 text-muted-foreground ${q.trim() ? "text-sm" : "mx-auto max-w-xl text-base sm:text-lg"}`}>
+          One search across the sources developers trust. Every claim links back to where it came from.
+        </p>
       </section>
 
       <form action="/search" className="glass animate-in fade-in slide-in-from-bottom-2 flex flex-col gap-2 rounded-2xl p-2 delay-150 duration-700 fill-mode-both sm:flex-row">
@@ -77,6 +82,20 @@ export default async function SearchPage({
         </select>
         <Button type="submit" className="h-11 rounded-xl px-6 transition-transform active:scale-95">Search</Button>
       </form>
+
+      {!q.trim() && (
+        <div className="animate-in fade-in mx-auto mt-10 max-w-2xl delay-300 duration-700 fill-mode-both">
+          <ul className="grid gap-3 text-sm sm:grid-cols-2">
+            {["Bring your own AI key", "Claude, GPT, Gemini & more", "Runs 100% on your machine", "One-command ds update"].map((f) => (
+              <li key={f} className="feature">{f}</li>
+            ))}
+          </ul>
+          <div className="glass mt-6 flex items-center justify-between gap-4 rounded-xl px-4 py-3 font-mono text-sm">
+            <span><span className="text-primary">$</span> npm i -g @aryptn/devsearch &amp;&amp; <span className="text-[var(--link)]">ds</span></span>
+            <span className="hidden font-sans text-xs text-muted-foreground sm:inline">MIT · open source</span>
+          </div>
+        </div>
+      )}
 
       {filters === null && (
         <p role="alert" className="mt-4 text-sm text-destructive">
