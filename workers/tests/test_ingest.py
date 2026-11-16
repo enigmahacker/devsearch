@@ -50,3 +50,11 @@ def test_connectors_emit_same_document_shape():
     assert "## Accepted answer (score 80, by sample_answerer)" in s.text
     assert "CC BY-SA" in s.text
     assert s.updated_at.startswith("2025-10-09")
+
+
+def test_markdown_pages_keep_their_structure():
+    src = '---\ntitle: middleware.js\ndescription: x\n---\n\n# middleware.js\n\nIntro.\n\n## Matcher\n\nUse `matcher`.\n'
+    d = docs.parse("https://nextjs.org/docs/x", src, {"language": "javascript", "framework": "next.js"}, markdown=True)
+    assert d.title == "middleware.js"
+    assert not d.text.startswith("---") and "description:" not in d.text
+    assert len(chunk(d.text)) == 2
