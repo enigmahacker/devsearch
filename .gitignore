@@ -12,3 +12,6 @@ __pycache__/
 .devsearch-seeded
 .vercel/
 .DS_Store
+
+# Local-only launch assets
+marketing/
