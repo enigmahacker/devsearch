@@ -104,19 +104,6 @@ if (fresh || stale) {
 }
 if (!existsSync(join(dir, ".env"))) copyFileSync(join(dir, ".env.example"), join(dir, ".env"));
 
-run("docker", ["compose", "up", "-d", "--wait"]);
-run("uv", ["sync"]);
-if (stale || !existsSync(join(dir, "web", "node_modules"))) run("npm", ["--prefix", "web", "install"]);
-const seeded = join(dir, ".devsearch-seeded");
-if (!existsSync(seeded)) {
-  run("uv", ["run", "--env-file", ".env", "python", "-m", "workers.run", "--fixtures"]);
-  writeFileSync(seeded, new Date().toISOString() + "\n");
-}
-
-// Say when a newer version is out; the check runs alongside the start and stays silent offline.
-latest().then((v) => v && newer(v, VERSION) && console.log(`\nDevSearch ${v} is available (you have ${VERSION}). Run \`ds update\`.\n`));
-
-// The web app gets the same .env (SUPPORT_URL, AUTH_*); Next.js would otherwise only read web/.env*.
 // Take the next free port, so a busy 3000/8000 never crashes the start or opens someone else's app.
 const free = (port) => new Promise((ok) => {
   const s = createServer().once("error", () => ok(false)).listen(port, "127.0.0.1", () => s.close(() => ok(true)));
@@ -125,11 +112,41 @@ async function pick(start) {
   for (let p = Number(start); p < Number(start) + 50; p++) if (await free(p)) return String(p);
   die(`no free port near ${start}`);
 }
+// Homebrew Postgres often holds 5432. Pick each store's port once and keep it: re-picking would recreate the containers.
+const portsFile = join(dir, ".devsearch-ports");
+const ports = existsSync(portsFile) ? JSON.parse(readFileSync(portsFile, "utf8")) : {
+  PG_PORT: await pick("5432"), OS_PORT: await pick("9200"), QDRANT_PORT: await pick("6333"), REDIS_PORT: await pick("6379"),
+};
+writeFileSync(portsFile, JSON.stringify(ports));
+const dotenv = parseEnv(readFileSync(join(dir, ".env"), "utf8"));
+// Point localhost URLs at the stores we started; a remote URL (Supabase, etc.) in .env is left alone.
+const local = (key, url) => (!dotenv[key] || /(\/\/|@)(localhost|127\.0\.0\.1)[:/]/.test(dotenv[key]) ? url : dotenv[key]);
+const stores = {
+  POSTGRES_DSN: local("POSTGRES_DSN", `postgresql://devsearch:devsearch@localhost:${ports.PG_PORT}/devsearch`),
+  OPENSEARCH_URL: local("OPENSEARCH_URL", `http://localhost:${ports.OS_PORT}`),
+  QDRANT_URL: local("QDRANT_URL", `http://localhost:${ports.QDRANT_PORT}`),
+  REDIS_URL: local("REDIS_URL", `redis://localhost:${ports.REDIS_PORT}/0`),
+};
+const storeEnv = { ...process.env, ...dotenv, ...stores };
+
+run("docker", ["compose", "up", "-d", "--wait"], { env: { ...process.env, ...ports } });
+run("uv", ["sync"]);
+if (stale || !existsSync(join(dir, "web", "node_modules"))) run("npm", ["--prefix", "web", "install"]);
+const seeded = join(dir, ".devsearch-seeded");
+if (!existsSync(seeded)) {
+  run("uv", ["run", "python", "-m", "workers.run", "--fixtures"], { env: storeEnv });
+  writeFileSync(seeded, new Date().toISOString() + "\n");
+}
+
+// Say when a newer version is out; the check runs alongside the start and stays silent offline.
+latest().then((v) => v && newer(v, VERSION) && console.log(`\nDevSearch ${v} is available (you have ${VERSION}). Run \`ds update\`.\n`));
+
+// The web app gets the same .env (SUPPORT_URL, AUTH_*); Next.js would otherwise only read web/.env*.
 const apiPort = await pick(process.env.API_PORT ?? "8000");
 const webPort = await pick(process.env.PORT ?? "3000");
-const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, DEVSEARCH_VERSION: VERSION, ...parseEnv(readFileSync(join(dir, ".env"), "utf8")) };
+const env = { ...process.env, API_URL: `http://127.0.0.1:${apiPort}`, PORT: webPort, DEVSEARCH_VERSION: VERSION, ...dotenv, ...stores };
 const procs = [
-  spawn("uv", ["run", "--env-file", ".env", "uvicorn", "api.app.main:app", "--host", "127.0.0.1", "--port", apiPort], { cwd: dir, stdio: "inherit", shell }),
+  spawn("uv", ["run", "uvicorn", "api.app.main:app", "--host", "127.0.0.1", "--port", apiPort], { cwd: dir, stdio: "inherit", env, shell }),
   // Loopback only: login is off in dev, so the app must not be reachable from the LAN.
   spawn("npm", ["--prefix", "web", "run", "dev", "--", "-H", "127.0.0.1", "-p", webPort], { cwd: dir, stdio: "inherit", env, shell }),
 ];
